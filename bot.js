@@ -18,7 +18,6 @@ try {
 }
 
 // Команда для загрузки изображений
-// Команда для загрузки изображений (теперь после инициализации бота)
 bot.command('upload_images', async (ctx) => {
     const zodiacFiles = {
         aries: ['jpg', 'png'],
@@ -91,32 +90,6 @@ bot.start((ctx) => {
   ctx.reply('Выберите знак зодиака для генерации гороскопа:', zodiacKeyboard);
 });
 
-// Добавьте временную функцию для теста (после инициализации бота)
-async function testMistralAPI() {
-    try {
-      const response = await axios.post(
-        'https://api.mistral.ai/v1/chat/completions',
-        {
-          model: "mistral-tiny",
-          messages: [{ role: "user", content: "Привет! Работаешь?" }],
-          temperature: 0.7
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${process.env.MISTRAL_API_KEY}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      console.log("Mistral ответил:", JSON.stringify(response.data, null, 2));
-    } catch (error) {
-      console.error("Ошибка Mistral API:", error.response?.data || error.message);
-    }
-}
-  
-  // Вызовите функцию при старте
-testMistralAPI();
-
 // Обработка кнопок
 bot.action(/.+/, async (ctx) => {
     try {
@@ -138,7 +111,7 @@ bot.action(/.+/, async (ctx) => {
       const horoscope = await generateMistralHoroscope(signName);
       
       // Формируем общую подпись
-      const caption = `*${getZodiacEmoji(signId)} ${signName}*\n\n${horoscope}`;
+      const caption = `*${getZodiacEmoji(signId)} ${signName}*\n\n${horoscope}\n\n☄️Luory`;
         
       // Получаем правильный file_id
       const photoFileId = fileIds[signId]; // Используем signId без расширения
@@ -170,34 +143,42 @@ bot.action(/.+/, async (ctx) => {
     }
 });
 
-// Генерация через DeepSeek API
+// Генерация через API
 async function generateMistralHoroscope(sign) {
-    const prompt = `Сгенерируй креативный гороскоп для ${sign} на сегодня. 
-    Используй 2-3 предложения, эмодзи и позитивный тон. 
-    Добавь совет на день.`;
+  // Получаем текущую дату
+  const today = new Date();
+  const formattedDate = today.toLocaleDateString("ru-RU", {
+      month: "long",   // Месяц
+      day: "numeric"   // День
+  });
 
-    try {
-        const response = await axios.post(
-        'https://api.mistral.ai/v1/chat/completions',
-        {
-            model: "mistral-tiny",
-            messages: [{ role: "user", content: prompt }],
-            temperature: 0.7,
-            max_tokens: 500,
-        },
-        {
-            headers: {
-            'Authorization': `Bearer ${process.env.MISTRAL_API_KEY}`,
-            'Content-Type': 'application/json'
-            }
-        }
-        );
-        
-        return response.data.choices[0].message.content;
-    } catch (error) {
-        console.error('Mistral API Error:', error.response?.data || error.message);
-        throw new Error('Ошибка генерации гороскопа');
-    }
+  // Формируем запрос с указанием даты
+  const prompt = `Напиши креативный гороскоп для ${sign} на ${formattedDate}. 
+  Используй 2-3 предложения, эмодзи и позитивный тон. 
+  Добавь совет на день.`;
+
+  try {
+      const response = await axios.post(
+          'https://api.mistral.ai/v1/chat/completions',
+          {
+              model: "mistral-tiny",
+              messages: [{ role: "user", content: prompt }],
+              temperature: 0.7,
+              max_tokens: 500,
+          },
+          {
+              headers: {
+                  'Authorization': `Bearer ${process.env.MISTRAL_API_KEY}`,
+                  'Content-Type': 'application/json'
+              }
+          }
+      );
+      
+      return response.data.choices[0].message.content;
+  } catch (error) {
+      console.error('Mistral API Error:', error.response?.data || error.message);
+      throw new Error('Ошибка генерации гороскопа');
+  }
 }
 
 // Получение эмодзи для знака
