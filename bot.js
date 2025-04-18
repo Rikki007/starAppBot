@@ -109,9 +109,10 @@ bot.action(/.+/, async (ctx) => {
   
       await ctx.replyWithChatAction('typing');
       const horoscope = await generateMistralHoroscope(signName);
+      const todayDate = getTodayDate();
       
       // Формируем общую подпись
-      const caption = `*${getZodiacEmoji(signId)} ${signName}*\n\n${horoscope}\n\n☄️Luory`;
+      const caption = `*${getZodiacEmoji(signId)} ${signName}*\n\n${todayDate}.\n\n${horoscope}\n\n☄️Luory`;
         
       // Получаем правильный file_id
       const photoFileId = fileIds[signId]; // Используем signId без расширения
@@ -135,7 +136,7 @@ bot.action(/.+/, async (ctx) => {
       }
       
       // Уведомляем пользователя
-      await ctx.reply(`Гороскоп для ${signName} успешно опубликован в канале!`);
+      await ctx.reply(`Гороскоп для ${signName} опубликован в канале!`);
       
     } catch (error) {
       console.error('Ошибка:', error);
@@ -143,19 +144,22 @@ bot.action(/.+/, async (ctx) => {
     }
 });
 
+// Генерация даты
+function getTodayDate() {
+  const date = new Date();
+  const todayDate = date.toLocaleDateString("ru-RU", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+  return todayDate;
+}
+
 // Генерация через API
 async function generateMistralHoroscope(sign) {
-  // Получаем текущую дату
-  const today = new Date();
-  const formattedDate = today.toLocaleDateString("ru-RU", {
-      month: "long",   // Месяц
-      day: "numeric"   // День
-  });
 
   // Формируем запрос с указанием даты
-  const prompt = `Напиши креативный гороскоп для ${sign} на ${formattedDate}. 
-  Используй 2-3 предложения, эмодзи и позитивный тон. 
-  Добавь совет на день.`;
+  const prompt = `Составь гороскоп для знака ${sign}. Гороскоп должен быть позитивным, содержать 2-3 осмысленных предложения о том, что ожидает этот знак в течение дня, и включать практический совет, который поможет сделать день лучше. Проследите, чтобы текст был грамматически правильным, без орфографических ошибок, и чтобы слова в предложениях соответствовали их контексту и формировали связное содержание`;
 
   try {
       const response = await axios.post(
@@ -163,8 +167,8 @@ async function generateMistralHoroscope(sign) {
           {
               model: "mistral-tiny",
               messages: [{ role: "user", content: prompt }],
-              temperature: 0.7,
-              max_tokens: 500,
+              temperature: 0.2,
+              max_tokens: 450,
           },
           {
               headers: {
