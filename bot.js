@@ -245,6 +245,22 @@ async function generateIOHoroscope(sign, astroData) {
     
   ].join('\n');
 
+  // переводчик для созвездий
+  const translateForConstellations = {
+    "Aries": "Овен",
+    "Taurus": "Телец",
+    "Gemini": "Близнецы",
+    "Cancer": "Рак",
+    "Leo": "Лев",
+    "Virgo": "Дева",
+    "Libra": "Весы",
+    "Scorpius": "Скорпион",
+    "Sagittarius": "Стрелец",
+    "Capricornus": "Козерог",
+    "Aquarius": "Водолей",
+    "Pisces": "Рыбы",
+  }
+
   const rulingPlanet = {
     "Овен": "Марс",
     "Телец": "Венера",
@@ -267,6 +283,9 @@ async function generateIOHoroscope(sign, astroData) {
   Астрологические данные:
   ${astroFacts}
 
+  Перевод названий созвездий из астрологических данных:
+  ${translateForConstellations}
+
   Требования:
   1. Тон: позитивный/нейтральный.
   2. Структура:
@@ -274,7 +293,7 @@ async function generateIOHoroscope(sign, astroData) {
     - Практический совет (1-2 предложения) по карьере, отношениям, финансам или досугу.
   3. Учёт астрологии:
     - Если Луна, Солнце или планеты (включая Плутон) находятся в ${sign}, объясни их влияние.
-    - Упомяни правящую планету знака ${sign} (${rulingPlanet}).
+    - Упомяни правящую планету знака ${sign} (${rulingPlanet[sign]}).
   4. Запрещено:
     - Профессиональный жаргон.
     - Общие фразы ("будьте осторожны", "доверяйте интуиции").
